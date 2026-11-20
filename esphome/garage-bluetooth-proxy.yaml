@@ -17,6 +17,16 @@ substitutions:
   # Passkey de emparejamiento del cargador (campo "P:" del QR, normalmente 001234 -> 1234).
   # NO es el PIN de la integración (campo "A:").
   wallbox_passkey: "1234"
+  # --- Detección del Tesla en la plaza (opcional, solo escucha, no se conecta) ---
+  # Nombre Bluetooth del coche: "S" + 16 caracteres hex + "C" (p. ej. S1a2b3c4d5e6f7a8bC).
+  # Lo ves en HA > Ajustes > Dispositivos y servicios > Bluetooth > Anuncios, o lo
+  # calculas desde el VIN (ver README). Déjalo como está si no lo usas.
+  tesla_ble_name: "SXXXXXXXXXXXXXXXXC"
+  # Señal mínima para considerar que está EN TU PLAZA (y no en la de al lado o en
+  # la calle). Mira el RSSI con el coche aparcado y pon unos 10 dB menos.
+  tesla_rssi_min: "-85"
+  # Segundos sin oír al coche para darlo por ido.
+  tesla_timeout_s: "180"
 
 esphome:
   name: ${name}
@@ -63,6 +73,28 @@ esp32_ble_tracker:
     interval: 1100ms
     window: 1100ms
     active: true
+  # El Tesla emite anuncios BLE continuamente (también dormido, para la llave del
+  # móvil). Solo los escuchamos: no se despierta el coche ni se ocupa conexión.
+  on_ble_advertise:
+    - then:
+        - lambda: |-
+            if (x.get_name() == "${tesla_ble_name}") {
+              id(tesla_last_seen_ms) = millis();
+              id(tesla_seen_once) = true;
+              id(tesla_rssi_last) = x.get_rssi();
+              id(tesla_rssi).publish_state(x.get_rssi());
+            }
+
+globals:
+  - id: tesla_last_seen_ms
+    type: uint32_t
+    initial_value: "0"
+  - id: tesla_seen_once
+    type: bool
+    initial_value: "false"
+  - id: tesla_rssi_last
+    type: int
+    initial_value: "-127"
 
 bluetooth_proxy:
   # active: true => Home Assistant puede CONECTARSE a dispositivos (necesario
@@ -84,7 +116,31 @@ ble_client:
             id: wallbox_pairing_helper
             passkey: ${wallbox_passkey}
 
+binary_sensor:
+  - platform: template
+    name: "Tesla en la plaza"
+    id: tesla_parked
+    device_class: occupancy
+    icon: mdi:car-electric
+    lambda: |-
+      if (!id(tesla_seen_once)) return false;
+      const bool recent = (uint32_t)(millis() - id(tesla_last_seen_ms)) < 1000UL * ${tesla_timeout_s};
+      return recent && id(tesla_rssi_last) >= ${tesla_rssi_min};
+    filters:
+      # Evita falsos positivos cuando el coche solo pasa por delante.
+      - delayed_on: 20s
+
 sensor:
+  - platform: template
+    name: "Tesla señal BLE"
+    id: tesla_rssi
+    unit_of_measurement: dBm
+    device_class: signal_strength
+    state_class: measurement
+    entity_category: diagnostic
+    accuracy_decimals: 0
+    filters:
+      - throttle_average: 30s
   - platform: wifi_signal
     name: "WiFi signal"
     update_interval: 60s

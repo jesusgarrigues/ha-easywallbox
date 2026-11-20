@@ -51,6 +51,30 @@ adaptador Bluetooth al alcance, también funciona sin proxy.
 
 ---
 
+### Opcional: saber si el Tesla está en la plaza
+El mismo proxy puede detectar tu Tesla **solo escuchando** los anuncios Bluetooth
+que el coche emite siempre (también dormido, para la llave del móvil). No se
+conecta, no despierta el coche ni gasta su batería, y no ocupa conexiones del
+proxy. Crea en ESPHome el sensor **"Tesla en la plaza"** (y "Tesla señal BLE"
+como diagnóstico).
+
+1. **Nombre Bluetooth del coche** (`tesla_ble_name`): tiene la forma
+   `S` + 16 caracteres hexadecimales + `C`. Búscalo en *Ajustes → Dispositivos y
+   servicios → Bluetooth → Anuncios* con el coche aparcado, o calcúlalo con tu VIN
+   (en tu ordenador; no hace falta compartirlo):
+   ```bash
+   python3 -c "import hashlib; v=input('VIN: ').strip().upper(); print('S'+hashlib.sha1(v.encode()).hexdigest()[:16]+'C')"
+   ```
+2. **Ajusta `tesla_rssi_min`**: con el coche en la plaza mira "Tesla señal BLE"
+   (p. ej. −70 dBm) y pon unos 10 dB menos (−80). Así no cuenta un Tesla en la
+   plaza de al lado o pasando por la calle.
+3. `tesla_timeout_s` (180 s por defecto): tiempo sin oírlo para darlo por ido.
+
+Complementa al sensor *Coche conectado* del cargador, que solo indica si el
+cable está enchufado.
+
+---
+
 ## 2. Instalar la integración con HACS
 
 1. HACS → menú ⋮ → **Repositorios personalizados**.
