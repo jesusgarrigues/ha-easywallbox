@@ -1,3 +1,5 @@
+<img src="custom_components/easywallbox/brand/icon@2x.png" alt="EasyWallbox BLE" width="128" align="right">
+
 # EasyWallbox (BLE) para Home Assistant
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://hacs.xyz/)
@@ -151,6 +153,12 @@ automation:
     logs:
       custom_components.easywallbox: debug
   ```
+
+## Icono
+El icono de la integración está en `custom_components/easywallbox/brand/`
+(Home Assistant 2026.3 o superior lo muestra automáticamente; en versiones
+anteriores aparece el icono genérico). Es un diseño propio (fuente en
+[`docs/icon.svg`](docs/icon.svg)), no el logotipo oficial del fabricante.
 
 ## Desarrollo
 ```bash
