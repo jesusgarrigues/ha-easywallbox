@@ -1,0 +1,14 @@
+EasyWallbox (BLE) for Home Assistant
+Copyright (c) 2026 jesusgarrigues
+
+The EasyWallbox BLE protocol handling and DPM-based charging control are
+derived from Easywallbox---Esphome
+(https://github.com/paolofaz/Easywallbox---Esphome),
+Copyright (c) 2026 Paolo, released under the MIT License.
+
+Protocol and PIN discovery documented by mihaistana/easywallbox
+(https://github.com/mihaistana/easywallbox), Apache License 2.0.
+
+The integration icon is the EasyWallbox app logo, a trademark of its owner,
+used only to identify the compatible charger. This project is not affiliated
+with eSolutions, Free2Move or Fimer.
