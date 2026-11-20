@@ -1,0 +1,32 @@
+name: Release
+
+# Pushing a tag like v0.1.0 creates the GitHub release with the integration
+# zip attached. Publishing a release manually from the UI also attaches it.
+on:
+  push:
+    tags:
+      - "v*"
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set version from tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          jq --arg v "$VERSION" '.version = $v' custom_components/easywallbox/manifest.json > m.json
+          mv m.json custom_components/easywallbox/manifest.json
+      - name: Zip integration
+        run: cd custom_components/easywallbox && zip -r ../../easywallbox.zip .
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: easywallbox.zip

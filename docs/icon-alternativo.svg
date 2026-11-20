@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a4a5c"/>
+      <stop offset="1" stop-color="#1f2a36"/>
+    </linearGradient>
+    <linearGradient id="bolt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7CFC8A"/>
+      <stop offset="1" stop-color="#1DB954"/>
+    </linearGradient>
+  </defs>
+  <!-- wallbox body -->
+  <rect x="96" y="16" width="250" height="360" rx="56" fill="url(#body)"/>
+  <rect x="122" y="44" width="198" height="140" rx="30" fill="#0f161e"/>
+  <!-- lightning bolt -->
+  <path d="M236 62 L178 132 L220 132 L204 172 L266 100 L224 100 Z" fill="url(#bolt)"/>
+  <!-- status LED bar -->
+  <rect x="150" y="214" width="142" height="16" rx="8" fill="#1DB954"/>
+  <!-- socket -->
+  <circle cx="221" cy="300" r="40" fill="#0f161e"/>
+  <circle cx="207" cy="292" r="8" fill="#3a4a5c"/>
+  <circle cx="235" cy="292" r="8" fill="#3a4a5c"/>
+  <circle cx="221" cy="314" r="8" fill="#3a4a5c"/>
+  <!-- cable -->
+  <path d="M221 340 C221 430 120 410 110 470" fill="none" stroke="#1f2a36" stroke-width="22" stroke-linecap="round"/>
+  <!-- bluetooth badge -->
+  <circle cx="390" cy="390" r="104" fill="#1E88E5"/>
+  <circle cx="390" cy="390" r="104" fill="none" stroke="#ffffff" stroke-width="12"/>
+  <path d="M356 352 L424 418 L390 450 L390 330 L424 362 L356 428"
+        fill="none" stroke="#ffffff" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

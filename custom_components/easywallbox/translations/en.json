@@ -1,0 +1,176 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "user": {
+        "title": "Select your EasyWallbox",
+        "description": "Wallboxes seen by your Bluetooth adapters or ESPHome Bluetooth proxies.",
+        "data": {
+          "address": "Wallbox"
+        }
+      },
+      "manual": {
+        "title": "EasyWallbox MAC address",
+        "description": "Enter the Bluetooth MAC address of the wallbox (e.g. 8C:F6:81:AA:BB:CC). It must be in range of a connectable Bluetooth adapter or ESPHome Bluetooth proxy.",
+        "data": {
+          "address": "MAC address"
+        }
+      },
+      "pin": {
+        "title": "BLE PIN",
+        "description": "Enter the BLE PIN of {name} ({address}). It is the `A:` field of the QR code on the wallbox label (not the `P:` pairing passkey). Close the manufacturer app first: the wallbox only accepts one BLE connection.",
+        "data": {
+          "pin": "PIN"
+        },
+        "data_description": {
+          "pin": "Usually 4 digits, field A: of the QR label."
+        }
+      },
+      "reauth_confirm": {
+        "title": "Wrong PIN",
+        "description": "The wallbox rejected the PIN. Enter the correct BLE PIN (field A: of the QR label).",
+        "data": {
+          "pin": "PIN"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "The wallbox rejected the PIN.",
+      "cannot_connect": "Could not connect to the wallbox. Check the proxy is close enough and the manufacturer app is closed.",
+      "not_in_range": "The wallbox is not in range of any connectable Bluetooth adapter or ESPHome Bluetooth proxy.",
+      "invalid_pin": "The PIN must be 4 to 6 digits.",
+      "invalid_mac": "Invalid MAC address.",
+      "unknown": "Unexpected error."
+    },
+    "abort": {
+      "already_configured": "This wallbox is already configured.",
+      "reauth_successful": "PIN updated."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "EasyWallbox options",
+        "data": {
+          "scan_interval": "Polling interval",
+          "max_current": "Maximum current for sliders",
+          "dpm_default": "Default DPM limit when resuming",
+          "pair": "Request BLE pairing on connect"
+        },
+        "data_description": {
+          "dpm_default": "Used by the charging switch when no previous DPM limit is known.",
+          "pair": "Disable only if your adapter fails when pairing is requested."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "charge_state": {
+        "name": "Charge state",
+        "state": {
+          "unplugged": "Cable unplugged",
+          "pause": "Paused",
+          "vehicle_ready": "Vehicle ready",
+          "charging": "Charging",
+          "error": "Error",
+          "unknown": "Unknown"
+        }
+      },
+      "charging_power": {
+        "name": "Charging power"
+      },
+      "session_energy": {
+        "name": "Session energy"
+      },
+      "session_duration": {
+        "name": "Session duration"
+      },
+      "house_power": {
+        "name": "House power (DPM)"
+      },
+      "house_current": {
+        "name": "House current (DPM)"
+      },
+      "charge_current_set": {
+        "name": "Charge current set"
+      },
+      "dpm_limit_set": {
+        "name": "DPM limit set"
+      },
+      "pilot_voltage": {
+        "name": "Control pilot voltage"
+      },
+      "offered_current": {
+        "name": "Offered current"
+      },
+      "safe_limit": {
+        "name": "Safe current limit"
+      },
+      "last_reply": {
+        "name": "Last BLE reply"
+      }
+    },
+    "binary_sensor": {
+      "connected": {
+        "name": "BLE connection"
+      },
+      "charging": {
+        "name": "Charging"
+      },
+      "car_connected": {
+        "name": "Car connected"
+      },
+      "charge_enabled": {
+        "name": "Charge enabled"
+      },
+      "dpm_enabled": {
+        "name": "DPM active"
+      },
+      "fault": {
+        "name": "Fault"
+      }
+    },
+    "number": {
+      "charge_current": {
+        "name": "Charge current"
+      },
+      "dpm_limit": {
+        "name": "House limit (DPM)"
+      }
+    },
+    "switch": {
+      "charging_enabled": {
+        "name": "Charging"
+      }
+    },
+    "button": {
+      "refresh": {
+        "name": "Refresh data"
+      },
+      "reconnect": {
+        "name": "Reconnect BLE"
+      }
+    }
+  },
+  "services": {
+    "send_command": {
+      "name": "Send command",
+      "description": "Send a raw protocol command to the wallbox (advanced, may change EEPROM settings).",
+      "fields": {
+        "config_entry_id": {
+          "name": "Wallbox",
+          "description": "EasyWallbox to send the command to."
+        },
+        "command": {
+          "name": "Command",
+          "description": "Protocol command, e.g. $EEP,READ,IDX,156"
+        },
+        "timeout": {
+          "name": "Timeout",
+          "description": "Seconds to wait for a reply."
+        }
+      }
+    }
+  }
+}

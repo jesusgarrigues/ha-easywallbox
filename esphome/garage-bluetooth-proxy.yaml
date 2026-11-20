@@ -1,0 +1,152 @@
+# Repetidor Bluetooth para el garaje (ESPHome Bluetooth Proxy) - EasyWallbox
+#
+# Un ESP32 cerca del cargador que reenvía el Bluetooth a Home Assistant por WiFi.
+# La integración "EasyWallbox (BLE)" de este repositorio se conecta al cargador
+# A TRAVÉS de este proxy de forma automática (no hay que configurar nada más).
+#
+# Secretos necesarios en secrets.yaml de ESPHome:
+#   wifi_ssid, wifi_password, api_encryption_key, ota_password
+#
+# Cambia wallbox_mac por la MAC de tu cargador (Ajustes > Dispositivos y servicios
+# > Bluetooth en Home Assistant, o con cualquier app de escáner BLE).
+
+substitutions:
+  name: garage-bt-proxy
+  friendly_name: "Garage Bluetooth Proxy"
+  wallbox_mac: "XX:XX:XX:XX:XX:XX"
+  # Passkey de emparejamiento del cargador (campo "P:" del QR, normalmente 001234 -> 1234).
+  # NO es el PIN de la integración (campo "A:").
+  wallbox_passkey: "1234"
+  # --- Detección del Tesla en la plaza (opcional, solo escucha, no se conecta) ---
+  # Nombre Bluetooth del coche: "S" + 16 caracteres hex + "C" (p. ej. S1a2b3c4d5e6f7a8bC).
+  # Lo ves en HA > Ajustes > Dispositivos y servicios > Bluetooth > Anuncios, o lo
+  # calculas desde el VIN (ver README). Déjalo como está si no lo usas.
+  tesla_ble_name: "SXXXXXXXXXXXXXXXXC"
+  # Señal mínima para considerar que está EN TU PLAZA (y no en la de al lado o en
+  # la calle). Mira el RSSI con el coche aparcado y pon unos 10 dB menos.
+  tesla_rssi_min: "-85"
+  # Segundos sin oír al coche para darlo por ido.
+  tesla_timeout_s: "180"
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  min_version: 2025.5.0
+
+esp32:
+  # Cualquier ESP32 "clásico" (ESP32-WROOM DevKit, M5Stack Atom Lite...) o ESP32-S3.
+  # Para un ESP32-S3 usa:  variant: esp32s3  y  board: esp32-s3-devkitc-1
+  board: esp32dev
+  framework:
+    type: esp-idf  # Obligatorio/recomendado para Bluetooth proxy
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  # El proxy tiene que estar bien conectado: si la WiFi del garaje es débil, mejor
+  # un ESP32 con Ethernet (Olimex ESP32-POE, WT32-ETH01...).
+  power_save_mode: none
+  ap:
+    ssid: "${name} fallback"
+
+captive_portal:
+
+logger:
+  level: INFO
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+# El cargador exige un enlace cifrado con passkey fija. El ESP32 actúa como
+# "teclado" y responde la passkey (ver ble_client más abajo).
+esp32_ble:
+  io_capability: keyboard_only
+
+esp32_ble_tracker:
+  scan_parameters:
+    # Valores recomendados por ESPHome para proxies activos.
+    interval: 1100ms
+    window: 1100ms
+    active: true
+  # El Tesla emite anuncios BLE continuamente (también dormido, para la llave del
+  # móvil). Solo los escuchamos: no se despierta el coche ni se ocupa conexión.
+  on_ble_advertise:
+    - then:
+        - lambda: |-
+            if (x.get_name() == "${tesla_ble_name}") {
+              id(tesla_last_seen_ms) = millis();
+              id(tesla_seen_once) = true;
+              id(tesla_rssi_last) = x.get_rssi();
+              id(tesla_rssi).publish_state(x.get_rssi());
+            }
+
+globals:
+  - id: tesla_last_seen_ms
+    type: uint32_t
+    initial_value: "0"
+  - id: tesla_seen_once
+    type: bool
+    initial_value: "false"
+  - id: tesla_rssi_last
+    type: int
+    initial_value: "-127"
+
+bluetooth_proxy:
+  # active: true => Home Assistant puede CONECTARSE a dispositivos (necesario
+  # para el EasyWallbox), no solo escuchar anuncios.
+  active: true
+  # Mantiene 3 ranuras de conexión; la integración usa 1 de forma persistente.
+  connection_slots: 3
+
+# Ayudante de emparejamiento: NO se conecta por sí mismo (auto_connect: false);
+# solo responde la passkey cuando el cargador la pide durante la conexión que
+# abre Home Assistant a través del proxy.
+ble_client:
+  - mac_address: ${wallbox_mac}
+    id: wallbox_pairing_helper
+    auto_connect: false
+    on_passkey_request:
+      then:
+        - ble_client.passkey_reply:
+            id: wallbox_pairing_helper
+            passkey: ${wallbox_passkey}
+
+binary_sensor:
+  - platform: template
+    name: "Tesla en la plaza"
+    id: tesla_parked
+    device_class: occupancy
+    icon: mdi:car-electric
+    lambda: |-
+      if (!id(tesla_seen_once)) return false;
+      const bool recent = (uint32_t)(millis() - id(tesla_last_seen_ms)) < 1000UL * ${tesla_timeout_s};
+      return recent && id(tesla_rssi_last) >= ${tesla_rssi_min};
+    filters:
+      # Evita falsos positivos cuando el coche solo pasa por delante.
+      - delayed_on: 20s
+
+sensor:
+  - platform: template
+    name: "Tesla señal BLE"
+    id: tesla_rssi
+    unit_of_measurement: dBm
+    device_class: signal_strength
+    state_class: measurement
+    entity_category: diagnostic
+    accuracy_decimals: 0
+    filters:
+      - throttle_average: 30s
+  - platform: wifi_signal
+    name: "WiFi signal"
+    update_interval: 60s
+  - platform: uptime
+    name: "Uptime"
+
+button:
+  - platform: restart
+    name: "Restart"

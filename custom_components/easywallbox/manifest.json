@@ -1,0 +1,27 @@
+{
+  "domain": "easywallbox",
+  "name": "EasyWallbox (BLE)",
+  "bluetooth": [
+    {
+      "connectable": true,
+      "local_name": "eWB*"
+    },
+    {
+      "connectable": true,
+      "service_uuid": "331a36f5-2459-45ea-9d95-6142f0c4b307"
+    }
+  ],
+  "codeowners": [
+    "@jesusgarrigues"
+  ],
+  "config_flow": true,
+  "dependencies": [
+    "bluetooth_adapters"
+  ],
+  "documentation": "https://github.com/jesusgarrigues/ha-easywallbox",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/jesusgarrigues/ha-easywallbox/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}

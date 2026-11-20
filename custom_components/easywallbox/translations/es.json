@@ -1,0 +1,176 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "user": {
+        "title": "Selecciona tu EasyWallbox",
+        "description": "Cargadores detectados por tus adaptadores Bluetooth o proxies Bluetooth ESPHome.",
+        "data": {
+          "address": "Cargador"
+        }
+      },
+      "manual": {
+        "title": "MAC del EasyWallbox",
+        "description": "Introduce la MAC Bluetooth del cargador (p. ej. 8C:F6:81:AA:BB:CC). Debe estar al alcance de un adaptador Bluetooth conectable o de un proxy Bluetooth ESPHome.",
+        "data": {
+          "address": "Dirección MAC"
+        }
+      },
+      "pin": {
+        "title": "PIN BLE",
+        "description": "Introduce el PIN BLE de {name} ({address}). Es el campo `A:` del código QR de la etiqueta del cargador (no el `P:` de emparejamiento). Cierra antes la app del fabricante: el cargador solo acepta una conexión BLE.",
+        "data": {
+          "pin": "PIN"
+        },
+        "data_description": {
+          "pin": "Normalmente 4 dígitos, campo A: del QR."
+        }
+      },
+      "reauth_confirm": {
+        "title": "PIN incorrecto",
+        "description": "El cargador ha rechazado el PIN. Introduce el PIN BLE correcto (campo A: del QR).",
+        "data": {
+          "pin": "PIN"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "El cargador ha rechazado el PIN.",
+      "cannot_connect": "No se pudo conectar con el cargador. Comprueba que el proxy está cerca y que la app del fabricante está cerrada.",
+      "not_in_range": "El cargador no está al alcance de ningún adaptador Bluetooth conectable ni proxy Bluetooth ESPHome.",
+      "invalid_pin": "El PIN debe tener entre 4 y 6 dígitos.",
+      "invalid_mac": "Dirección MAC no válida.",
+      "unknown": "Error inesperado."
+    },
+    "abort": {
+      "already_configured": "Este cargador ya está configurado.",
+      "reauth_successful": "PIN actualizado."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opciones de EasyWallbox",
+        "data": {
+          "scan_interval": "Intervalo de sondeo",
+          "max_current": "Corriente máxima de los deslizadores",
+          "dpm_default": "Límite DPM por defecto al reanudar",
+          "pair": "Solicitar emparejamiento BLE al conectar"
+        },
+        "data_description": {
+          "dpm_default": "Lo usa el interruptor de carga cuando no se conoce un límite DPM anterior.",
+          "pair": "Desactívalo solo si tu adaptador falla al pedir emparejamiento."
+        }
+      }
+    }
+  },
+  "entity": {
+    "sensor": {
+      "charge_state": {
+        "name": "Estado de carga",
+        "state": {
+          "unplugged": "Cable desconectado",
+          "pause": "En pausa",
+          "vehicle_ready": "Vehículo listo",
+          "charging": "Cargando",
+          "error": "Error",
+          "unknown": "Desconocido"
+        }
+      },
+      "charging_power": {
+        "name": "Potencia de carga"
+      },
+      "session_energy": {
+        "name": "Energía de la sesión"
+      },
+      "session_duration": {
+        "name": "Duración de la sesión"
+      },
+      "house_power": {
+        "name": "Potencia casa (DPM)"
+      },
+      "house_current": {
+        "name": "Corriente casa (DPM)"
+      },
+      "charge_current_set": {
+        "name": "Corriente de carga fijada"
+      },
+      "dpm_limit_set": {
+        "name": "Límite DPM fijado"
+      },
+      "pilot_voltage": {
+        "name": "Tensión control pilot"
+      },
+      "offered_current": {
+        "name": "Corriente ofrecida"
+      },
+      "safe_limit": {
+        "name": "Límite de corriente seguro"
+      },
+      "last_reply": {
+        "name": "Última respuesta BLE"
+      }
+    },
+    "binary_sensor": {
+      "connected": {
+        "name": "Conexión BLE"
+      },
+      "charging": {
+        "name": "Cargando"
+      },
+      "car_connected": {
+        "name": "Coche conectado"
+      },
+      "charge_enabled": {
+        "name": "Carga habilitada"
+      },
+      "dpm_enabled": {
+        "name": "DPM activo"
+      },
+      "fault": {
+        "name": "Fallo"
+      }
+    },
+    "number": {
+      "charge_current": {
+        "name": "Corriente de carga"
+      },
+      "dpm_limit": {
+        "name": "Límite casa (DPM)"
+      }
+    },
+    "switch": {
+      "charging_enabled": {
+        "name": "Carga"
+      }
+    },
+    "button": {
+      "refresh": {
+        "name": "Actualizar datos"
+      },
+      "reconnect": {
+        "name": "Reconectar BLE"
+      }
+    }
+  },
+  "services": {
+    "send_command": {
+      "name": "Enviar comando",
+      "description": "Envía un comando del protocolo al cargador (avanzado, puede cambiar ajustes de la EEPROM).",
+      "fields": {
+        "config_entry_id": {
+          "name": "Wallbox",
+          "description": "EasyWallbox al que enviar el comando."
+        },
+        "command": {
+          "name": "Comando",
+          "description": "Comando del protocolo, p. ej. $EEP,READ,IDX,156"
+        },
+        "timeout": {
+          "name": "Timeout",
+          "description": "Segundos a esperar la respuesta."
+        }
+      }
+    }
+  }
+}
