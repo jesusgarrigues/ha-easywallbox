@@ -157,8 +157,10 @@ automation:
 ## Icono
 El icono de la integración está en `custom_components/easywallbox/brand/`
 (Home Assistant 2026.3 o superior lo muestra automáticamente; en versiones
-anteriores aparece el icono genérico). Es un diseño propio (fuente en
-[`docs/icon.svg`](docs/icon.svg)), no el logotipo oficial del fabricante.
+anteriores aparece el icono genérico). Es el logotipo de la app de eSolutions
+para el EasyWallbox: marca registrada de su propietario, usada solo para
+identificar el cargador compatible; este proyecto no es oficial. Hay un icono
+alternativo propio (sin marcas) en [`docs/icon-alternativo.svg`](docs/icon-alternativo.svg).
 
 ## Desarrollo
 ```bash
